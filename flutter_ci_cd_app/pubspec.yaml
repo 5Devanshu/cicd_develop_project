@@ -1,0 +1,25 @@
+name: flutter_ci_cd_app
+description: A simple Flutter app for CI/CD pipeline
+publish_to: 'none' # Remove this line if you plan to publish the app
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.19.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Additional dependencies can be added here
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
+
+# Other configurations (like fonts, etc) can be added as necessary
