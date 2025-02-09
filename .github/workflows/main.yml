@@ -68,25 +68,7 @@ jobs:
           name: android-aab
           path: build/app/outputs/bundle/release/app-release.aab
 
-  build-ios:
-    runs-on: macos-latest
-    needs: code-quality
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      - name: Set up Flutter SDK
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.27.4'
-      - name: Install dependencies
-        run: flutter pub get
-      - name: Build iOS IPA
-        run: flutter build ios --release --no-codesign
-      - name: Upload iOS IPA artifact
-        uses: actions/upload-artifact@v3  # Updated to v3
-        with:
-          name: ios-ipa
-          path: build/ios/iphoneos/Runner.ipa
+
 
   deploy:
     needs: build-android
@@ -102,7 +84,4 @@ jobs:
         run: |
           gem install fastlane
           fastlane android beta --json_key ${{ secrets.FASTLANE_ANDROID_JSON_KEY }}
-      - name: Deploy to Apple App Store (Fastlane)
-        run: |
-          gem install fastlane
-          fastlane ios beta --username ${{ secrets.FASTLANE_APPLE_USERNAME }} --app_identifier ${{ secrets.FASTLANE_APPLE_CERT }} --password ${{ secrets.FASTLANE_APPLE_PASSWORD }}
+
