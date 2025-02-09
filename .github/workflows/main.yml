@@ -57,14 +57,16 @@ jobs:
         run: flutter clean
       - name: Build Android APK
         run: flutter build apk --release
-      - name: Build Android AAB
-        run: flutter build appbundle --release
+      - name: List files in build directory
+        run: ls -R build/app/outputs/flutter-apk/
       - name: Check if APK exists
         run: |
           if [ ! -f build/app/outputs/flutter-apk/app-release.apk ]; then
             echo "APK file not found!"
             exit 1
           fi
+      - name: Build Android AAB
+        run: flutter build appbundle --release
       - name: Upload Android APK artifact
         uses: actions/upload-artifact@v4
         with:
@@ -84,7 +86,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Deploy Android to Firebase
         run: |
-          curl -sL https://firebase.tools | bash
+          curl -sL https://firebase.tools | bash -s -- --no-progress
           firebase appdistribution:distribute build/app/outputs/flutter-apk/app-release.apk --app ${{ secrets.FIREBASE_APP_ID }} --groups "testers" --token ${{ secrets.FIREBASE_AUTH_TOKEN }}
       - name: Deploy to Google Play Store (Fastlane)
         run: |
