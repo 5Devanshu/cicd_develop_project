@@ -79,34 +79,29 @@ jobs:
           path: build/app/outputs/bundle/release/app-release.aab
 
   deploy:
-    needs: build-android
-    runs-on: ubuntu-latest
-    steps:
+   needs: build-android
+   runs-on: ubuntu-latest
+   steps:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '16'  # or whichever version you need
-
-    - name: Install Fastlane via NPM
+    - name: Set up Docker to use Fastlane
       run: |
-        npm install -g fastlane
-
-    - name: Install Fastlane Firebase App Distribution plugin
-      run: |
-        fastlane add_plugin firebase_app_distribution
-      working-directory: android
+        docker pull fastlane/fastlane
 
     - name: Configure Google Application Credentials
       run: |
         echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" > $HOME/gcp-key.json
 
-    - name: Run Fastlane for Android
+    - name: Run Fastlane for Android (Docker)
       run: |
-        fastlane distribute
+        docker run --rm \
+          -v $PWD:/workspace \
+          -v $HOME/gcp-key.json:/gcp-key.json \
+          fastlane/fastlane:latest \
+          fastlane distribute
       working-directory: android
       env:
-        GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+        GOOGLE_APPLICATION_CREDENTIALS: /gcp-key.json
+
 
