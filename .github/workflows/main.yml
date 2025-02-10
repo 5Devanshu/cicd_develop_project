@@ -102,21 +102,24 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Setup Firebase Service Account
-        run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}' > firebase-service-account.json
         
       - name: Install Firebase CLI
         run: |
           curl -sL https://firebase.tools | bash
           echo "$HOME/.firebase/bin" >> $GITHUB_PATH  # Ensure Firebase CLI is in PATH
       
-      - name: Deploy Android to Firebase (Service Account)
+      - name: Setup Firebase Authentication
+        run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}' > firebase-service-account.json
+        
+      - name: Authenticate with Google Cloud
+        run: export GOOGLE_APPLICATION_CREDENTIALS=firebase-service-account.json
+        
+      - name: Deploy Android to Firebase
         run: |
-          firebase appdistribution:distribute build/app/outputs/flutter-apk/app-release.apk \
+            firebase appdistribution:distribute build/app/outputs/flutter-apk/app-release.apk \
             --app ${{ secrets.FIREBASE_APP_ID }} \
-            --groups "testers" \
-            --service-account-key-file firebase-service-account.json
+            --groups "testers"
+        
       
 
       - name: Setup Fastlane JSON Key
