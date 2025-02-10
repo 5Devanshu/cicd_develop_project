@@ -84,16 +84,23 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      - name: Set up Firebase CLI with Service Account
-        run: |
-          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}" > firebase-service-account.json
-          export GOOGLE_APPLICATION_CREDENTIALS=firebase-service-account.json
-      - name: Deploy Android to Firebase
-        run: |
-          curl -sL https://firebase.tools | bash -s -- --no-progress
-          firebase appdistribution:distribute build/app/outputs/flutter-apk/app-release.apk --app ${{ secrets.FIREBASE_APP_ID }} --groups "testers"
-      - name: Deploy to Google Play Store (Fastlane)
+
+      - name: Install Fastlane
         run: |
           gem install fastlane
-          fastlane android beta --json_key ${{ secrets.FASTLANE_ANDROID_JSON_KEY }}
 
+      - name: Install Fastlane Firebase App Distribution plugin
+        run: |
+          fastlane add_plugin firebase_app_distribution
+        working-directory: android
+
+      - name: Configure Google Application Credentials
+        run: |
+          echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" > $HOME/gcp-key.json
+
+      - name: Run Fastlane for Android
+        run: |
+          fastlane distribute
+        working-directory: android
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
