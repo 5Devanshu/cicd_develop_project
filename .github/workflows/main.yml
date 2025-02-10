@@ -87,7 +87,7 @@ jobs:
 
     - name: Configure Google Application Credentials
       run: |
-        echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" > $HOME/gcp-key.json
+        echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS}}" > $HOME/gcp-key.json
 
     - name: Deploy to Firebase App Distribution (optional)
       run: |
