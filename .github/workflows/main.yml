@@ -85,16 +85,23 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Set up Fastlane GitHub Action
-      uses: fastlane/actions/fastlane@v2
-      with:
-        lane: distribute
-        json_key: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+    - name: Install Fastlane
+      run: |
+        gem install fastlane --user-install
+
+    - name: Install Fastlane Firebase App Distribution plugin
+      run: |
+        fastlane add_plugin firebase_app_distribution
+      working-directory: android
+
+    - name: Configure Google Application Credentials
+      run: |
+        echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" > $HOME/gcp-key.json
 
     - name: Run Fastlane for Android
-      run: fastlane distribute
+      run: |
+        fastlane distribute
       working-directory: android
       env:
         GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
-
 
