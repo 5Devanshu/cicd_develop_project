@@ -30,8 +30,11 @@ jobs:
       # Decode google-services.json
       - name: Decode google-services.json
         env: 
-          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
-        run: echo "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICE_JSON }}
+        run: echo "${{ secrets.GOOGLE_SERVICE_JSON }}" | base64 --decode > android/app/google-services.json
+
+      - name: Debug google-services.json
+        run: cat android/app/google-services.json
 
       # Decode Firebase options
       - name: Decode firebase_options.dart
@@ -63,7 +66,7 @@ jobs:
         run: |
           echo "Firebase App ID: $APPID"
         env:
-          APPID: ${{ secrets.APPID }}
+          APPID: ${{ secrets.APP_ID }}
 
 
     
@@ -71,7 +74,7 @@ jobs:
       - name: Upload APK to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
-            appId: ${{ secrets.APPID }}
+            appId: ${{ secrets.APP_ID }}
             token: ${{ secrets.TOKEN }}
             groups: pre-tester
             file: build/app/outputs/apk/release/app-release.apk
