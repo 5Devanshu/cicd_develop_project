@@ -85,23 +85,16 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Set up Docker to use Fastlane
-      run: |
-        docker pull fastlane/fastlane
+    - name: Set up Fastlane GitHub Action
+      uses: fastlane/actions/fastlane@v2
+      with:
+        lane: distribute
+        json_key: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
 
-    - name: Configure Google Application Credentials
-      run: |
-        echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" > $HOME/gcp-key.json
-
-    - name: Run Fastlane for Android (Docker)
-      run: |
-        docker run --rm \
-          -v $PWD:/workspace \
-          -v $HOME/gcp-key.json:/gcp-key.json \
-          fastlane/fastlane:latest \
-          fastlane distribute
+    - name: Run Fastlane for Android
+      run: fastlane distribute
       working-directory: android
       env:
-        GOOGLE_APPLICATION_CREDENTIALS: /gcp-key.json
+        GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
 
 
