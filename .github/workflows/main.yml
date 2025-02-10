@@ -82,25 +82,31 @@ jobs:
     needs: build-android
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      - name: Install Fastlane
-        run: |
-          gem install fastlane --user-install
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'  # or whichever version you need
 
-      - name: Install Fastlane Firebase App Distribution plugin
-        run: |
-          fastlane add_plugin firebase_app_distribution
-        working-directory: android
+    - name: Install Fastlane via NPM
+      run: |
+        npm install -g fastlane
 
-      - name: Configure Google Application Credentials
-        run: |
-          echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" > $HOME/gcp-key.json
+    - name: Install Fastlane Firebase App Distribution plugin
+      run: |
+        fastlane add_plugin firebase_app_distribution
+      working-directory: android
 
-      - name: Run Fastlane for Android
-        run: |
-          fastlane distribute
-        working-directory: android
-        env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+    - name: Configure Google Application Credentials
+      run: |
+        echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" > $HOME/gcp-key.json
+
+    - name: Run Fastlane for Android
+      run: |
+        fastlane distribute
+      working-directory: android
+      env:
+        GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+
