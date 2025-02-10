@@ -12,39 +12,31 @@ on:
     - cron: '0 0 * * *' # Runs daily at midnight UTC
 
 jobs:
-  setup:
-    runs-on: ubuntu-latest
+  checkout-setup:
+    runs-on: macos-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Cache Flutter SDK
-        uses: actions/cache@v3
-        with:
-          path: /opt/flutter
-          key: ${{ runner.os }}-flutter-3.27.4
-
-      - name: Install Flutter SDK (if not cached)
-        if: steps.cache.outputs.cache-hit != 'true'
+      - name: Set up Flutter SDK
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.27.4'
-
-      - name: Add Flutter to PATH
-        run: echo "/opt/flutter/bin" >> $GITHUB_PATH
 
       - name: Run Flutter doctor
         run: flutter doctor -v
 
   code-quality:
     runs-on: ubuntu-latest
-    needs: setup
+    needs: checkout-setup
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Use Cached Flutter SDK
-        run: echo "/opt/flutter/bin" >> $GITHUB_PATH
+      - name: Set up Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.4'
 
       - name: Cache Flutter dependencies
         uses: actions/cache@v3
@@ -70,8 +62,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Use Cached Flutter SDK
-        run: echo "/opt/flutter/bin" >> $GITHUB_PATH
+      - name: Set up Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.4'
 
       - name: Cache Flutter dependencies
         uses: actions/cache@v3
@@ -103,28 +97,27 @@ jobs:
           path: build/app/outputs/bundle/release/app-release.aab
 
   deploy:
-    runs-on: ubuntu-latest
-    needs: build-android
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+   runs-on: ubuntu-latest
+   steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Install Firebase CLI
-        run: |
-          curl -sL https://firebase.tools | bash
-          echo "$HOME/.firebase/bin" >> $GITHUB_PATH
+    - name: Install Firebase CLI
+      run: |
+        curl -sL https://firebase.tools | bash
+        echo "$HOME/.firebase/bin" >> $GITHUB_PATH
 
-      - name: Set up Firebase Authentication
-        run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}' > firebase-service-account.json
+    - name: Set up Firebase Authentication
+      run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}' > firebase-service-account.json
 
-      - name: Export Google Cloud Credentials
-        run: echo "GOOGLE_APPLICATION_CREDENTIALS=$(pwd)/firebase-service-account.json" >> $GITHUB_ENV
+    - name: Export Google Cloud Credentials
+      run: echo "GOOGLE_APPLICATION_CREDENTIALS=$(pwd)/firebase-service-account.json" >> $GITHUB_ENV
 
-      - name: Verify Firebase Authentication
-        run: cat $GOOGLE_APPLICATION_CREDENTIALS  # Debugging step to check if the file exists
+    - name: Verify Firebase Authentication
+      run: cat $GOOGLE_APPLICATION_CREDENTIALS  # Debugging step to check if the file exists
 
-      - name: Deploy Android to Firebase
-        run: |
-          firebase appdistribution:distribute build/app/outputs/flutter-apk/app-release.apk \
-          --app ${{ secrets.FIREBASE_APP_ID }} \
-          --groups "testers"
+    - name: Deploy Android to Firebase
+      run: |
+        firebase appdistribution:distribute build/app/outputs/flutter-apk/app-release.apk \
+        --app ${{ secrets.FIREBASE_APP_ID }} \
+        --groups "testers"
