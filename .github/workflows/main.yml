@@ -105,13 +105,19 @@ jobs:
 
       - name: Setup Firebase Service Account
         run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}' > firebase-service-account.json
-
+        
+      - name: Install Firebase CLI
+        run: |
+          curl -sL https://firebase.tools | bash
+          echo "$HOME/.firebase/bin" >> $GITHUB_PATH  # Ensure Firebase CLI is in PATH
+      
       - name: Deploy Android to Firebase (Service Account)
         run: |
           firebase appdistribution:distribute build/app/outputs/flutter-apk/app-release.apk \
-          --app ${{ secrets.FIREBASE_APP_ID }} \
-          --groups "testers" \
-          --service-account-key-file firebase-service-account.json
+            --app ${{ secrets.FIREBASE_APP_ID }} \
+            --groups "testers" \
+            --service-account-key-file firebase-service-account.json
+      
 
       - name: Setup Fastlane JSON Key
         run: echo '${{ secrets.FASTLANE_ANDROID_JSON_KEY }}' > fastlane-secret.json
