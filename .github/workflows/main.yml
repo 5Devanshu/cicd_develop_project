@@ -97,36 +97,36 @@ jobs:
           path: build/app/outputs/bundle/release/app-release.aab
 
   deploy:
-    needs: build-android
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        
-      - name: Install Firebase CLI
-        run: |
-          curl -sL https://firebase.tools | bash
-          echo "$HOME/.firebase/bin" >> $GITHUB_PATH  # Ensure Firebase CLI is in PATH
-      
-      - name: Setup Firebase Authentication
-        run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}' > firebase-service-account.json
-        
-      - name: Authenticate with Google Cloud
-        run: export GOOGLE_APPLICATION_CREDENTIALS=firebase-service-account.json
-        
-      - name: Deploy Android to Firebase
-        run: |
-            firebase appdistribution:distribute build/app/outputs/flutter-apk/app-release.apk \
-            --app ${{ secrets.FIREBASE_APP_ID }} \
-            --groups "testers"
-        
-      
+   needs: build-android
+   runs-on: ubuntu-latest
+   steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Setup Fastlane JSON Key
-        run: echo '${{ secrets.FASTLANE_ANDROID_JSON_KEY }}' > fastlane-secret.json
+    - name: Install Firebase CLI
+      run: |
+        curl -sL https://firebase.tools | bash
+        echo "$HOME/.firebase/bin" >> $GITHUB_PATH  # Ensure Firebase CLI is in PATH
+        export PATH="$HOME/.firebase/bin:$PATH"
 
-      - name: Deploy to Google Play Store (Fastlane)
-        run: |
-          gem install fastlane
-          fastlane android beta --json_key fastlane-secret.json
+    - name: Setup Firebase Authentication
+      run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}' > firebase-service-account.json
+
+    - name: Authenticate with Google Cloud
+      run: echo "GOOGLE_APPLICATION_CREDENTIALS=$(pwd)/firebase-service-account.json" >> $GITHUB_ENV
+
+    - name: Deploy Android to Firebase
+      run: |
+        firebase appdistribution:distribute build/app/outputs/flutter-apk/app-release.apk \
+        --app ${{ secrets.FIREBASE_APP_ID }} \
+        --groups "testers"
+
+    - name: Setup Fastlane JSON Key
+      run: echo '${{ secrets.FASTLANE_ANDROID_JSON_KEY }}' > fastlane-secret.json
+
+    - name: Deploy to Google Play Store (Fastlane)
+      run: |
+        gem install fastlane
+        fastlane android beta --json_key fastlane-secret.json
+
  
