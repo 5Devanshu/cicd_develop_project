@@ -1,0 +1,2 @@
+json_key_file = "fastlane-secret.json" # Path to the Google Play service account key file
+package_name("develop1") # Replace with your actual package name
